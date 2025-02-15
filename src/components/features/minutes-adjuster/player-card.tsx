@@ -37,31 +37,31 @@ export const PlayerCard = ({
   const minutesPercentage = ((player.Minutes / teamTotals.minutes) * 100).toFixed(1);
 
   return (
-    <Card className="w-full bg-[#080808] hover:bg-[#101010] transition-colors duration-200 rounded-lg">
-      <div className="p-5">
+    <Card className="w-full bg-card hover:bg-card-hover transition-colors duration-200 shadow-lg">
+      <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <h3 className="text-white font-medium">{player.Player}</h3>
-              <span className="text-zinc-500 text-sm">{player.Position}</span>
+              <h3 className="text-lg font-semibold text-foreground">{player.Player}</h3>
+              <span className="text-sm text-muted-foreground">{player.Position}</span>
             </div>
-            <div className="text-sm text-zinc-500">
+            <div className="text-sm text-muted-foreground">
               {minutesPercentage}% of team minutes
             </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <div className="text-white font-medium">
+              <div className="text-lg font-semibold text-foreground">
                 {player.Minutes.toFixed(1)}
-                <span className="text-zinc-500 text-xs ml-1">mins</span>
+                <span className="text-sm text-muted-foreground ml-1">mins</span>
               </div>
               {showDifferences && (
-                <div className={`text-xs ${
+                <div className={`text-sm ${
                   minutesDiff > 0 
                     ? 'text-emerald-500' 
                     : minutesDiff < 0 
                     ? 'text-red-500' 
-                    : 'text-zinc-500'
+                    : 'text-muted-foreground'
                 }`}>
                   {minutesDiff > 0 ? '+' : ''}{minutesDiff.toFixed(1)} mins
                 </div>
@@ -69,19 +69,19 @@ export const PlayerCard = ({
             </div>
             <button
               onClick={onToggleExpand}
-              className="p-1 hover:bg-white/5 rounded-full transition-colors"
+              className="p-2 hover:bg-accent rounded-full transition-colors"
               aria-label={isExpanded ? "Collapse player stats" : "Expand player stats"}
             >
               {isExpanded ? (
-                <ChevronUp className="h-5 w-5 text-zinc-400" />
+                <ChevronUp className="h-5 w-5 text-muted-foreground" />
               ) : (
-                <ChevronDown className="h-5 w-5 text-zinc-400" />
+                <ChevronDown className="h-5 w-5 text-muted-foreground" />
               )}
             </button>
           </div>
         </div>
 
-        <div className="mt-6 space-y-6">
+        <div className="space-y-6">
           <div className="flex items-center gap-4">
             <Slider
               value={[player.Minutes]}
@@ -95,7 +95,7 @@ export const PlayerCard = ({
               type="number"
               value={player.Minutes}
               onChange={handleInputChange}
-              className="w-20 text-right bg-transparent border-0 text-white"
+              className="w-20 text-right bg-input border-input text-foreground"
               min={0}
               max={48}
               step={0.5}
@@ -103,7 +103,7 @@ export const PlayerCard = ({
           </div>
 
           {isExpanded && (
-            <div className="grid grid-cols-7 gap-6 pt-6 border-t border-white/5">
+            <div className="grid grid-cols-2 md:grid-cols-7 gap-6 pt-6 border-t border-border">
               <StatDisplay
                 label="PTS"
                 value={player.scaledStats.Points}

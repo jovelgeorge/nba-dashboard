@@ -121,7 +121,7 @@ export const MinutesAdjuster = () => {
   const originalTeamStats = getOriginalTeamTotals();
 
   return (
-    <div className="container mx-auto max-w-7xl py-6 space-y-6">
+    <div className="container mx-auto max-w-7xl py-8 space-y-8">
       {sources.length === 0 ? (
         <FileUpload 
           onDataLoaded={handleDataLoaded}
@@ -138,6 +138,7 @@ export const MinutesAdjuster = () => {
                       key={source.id}
                       variant={source.id === activeSourceId ? "default" : "outline"}
                       onClick={() => setActiveSource(source.id)}
+                      className="font-medium"
                     >
                       {source.name}
                     </Button>
@@ -147,6 +148,7 @@ export const MinutesAdjuster = () => {
               <Button
                 variant="ghost"
                 onClick={() => window.location.reload()}
+                className="text-muted-foreground hover:text-foreground"
               >
                 Upload New File
               </Button>
@@ -173,7 +175,7 @@ export const MinutesAdjuster = () => {
                     onCheckedChange={setUseEtrProjections}
                     id="etr-switch"
                   />
-                  <label htmlFor="etr-switch" className="text-sm">
+                  <label htmlFor="etr-switch" className="text-sm text-muted-foreground">
                     Use ETR Projections
                   </label>
                 </div>
@@ -183,7 +185,7 @@ export const MinutesAdjuster = () => {
                     onCheckedChange={setShowDifferences}
                     id="diff-switch"
                   />
-                  <label htmlFor="diff-switch" className="text-sm">
+                  <label htmlFor="diff-switch" className="text-sm text-muted-foreground">
                     Show Differences
                   </label>
                 </div>
@@ -193,11 +195,11 @@ export const MinutesAdjuster = () => {
 
           {selectedTeam && (
             <>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">{selectedTeam}</h2>
-                <span className={`text-sm ${
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-semibold text-foreground">{selectedTeam}</h2>
+                <span className={`text-sm font-medium ${
                   Math.abs(teamStats.minutes - 240) < 0.1 
-                    ? 'text-green-500' 
+                    ? 'text-emerald-500' 
                     : 'text-destructive'
                 }`}>
                   {teamStats.minutes.toFixed(1)}/240 minutes
@@ -205,18 +207,38 @@ export const MinutesAdjuster = () => {
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card className="p-4">
+                <Card className="p-6">
                   <StatDisplay
                     label="PTS"
                     value={teamStats.Points}
                     originalValue={originalTeamStats.Points}
                   />
                 </Card>
-                {/* Other stat cards... */}
+                <Card className="p-6">
+                  <StatDisplay
+                    label="REB"
+                    value={teamStats.Rebounds}
+                    originalValue={originalTeamStats.Rebounds}
+                  />
+                </Card>
+                <Card className="p-6">
+                  <StatDisplay
+                    label="AST"
+                    value={teamStats.Assists}
+                    originalValue={originalTeamStats.Assists}
+                  />
+                </Card>
+                <Card className="p-6">
+                  <StatDisplay
+                    label="STL"
+                    value={teamStats.Steals}
+                    originalValue={originalTeamStats.Steals}
+                  />
+                </Card>
               </div>
 
               {Math.abs(teamStats.minutes - 240) > 0.1 && (
-                <Alert variant="destructive">
+                <Alert variant="destructive" className="bg-destructive/5 text-destructive">
                   <Info className="h-4 w-4" />
                   <AlertDescription>
                     Team minutes need to be adjusted. Current total: {teamStats.minutes.toFixed(1)} 
@@ -225,15 +247,17 @@ export const MinutesAdjuster = () => {
                 </Alert>
               )}
 
-              <PlayerList
-                players={teamPlayers}
-                onUpdateMinutes={(playerId, minutes) => 
-                  activeSourceId && updatePlayerMinutes(activeSourceId, playerId, minutes)
-                }
-                teamTotals={teamStats}
-                expandedPlayerId={expandedPlayerId}
-                onToggleExpand={setExpandedPlayerId}
-              />
+              <div className="space-y-4">
+                <PlayerList
+                  players={teamPlayers}
+                  onUpdateMinutes={(playerId, minutes) => 
+                    activeSourceId && updatePlayerMinutes(activeSourceId, playerId, minutes)
+                  }
+                  teamTotals={teamStats}
+                  expandedPlayerId={expandedPlayerId}
+                  onToggleExpand={setExpandedPlayerId}
+                />
+              </div>
             </>
           )}
         </>
