@@ -1,9 +1,17 @@
+/**
+ * Team Statistics Components
+ * This module exports all components related to team statistics display and manipulation.
+ */
+
 import { Card } from '@/components/ui/card';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { LoadingOverlay } from '../Layout/LoadingOverlay';
 import { TeamHeader } from './TeamHeader';
 import { TeamStats } from './TeamStats';
 import { PlayerList } from '../PlayerStats';
+
+export { TeamHeader } from './TeamHeader';
+export { TeamStats } from './TeamStats';
 
 export function TeamSection() {
   const { state } = useDashboard();

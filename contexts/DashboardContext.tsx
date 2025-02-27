@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { processCSVFile } from '@/lib/data-processing';
+import { scaleStats } from '@/lib/utils';
 import type { 
   UnifiedStat, 
   DataSource, 
   FileStatus, 
   DashboardState, 
   DashboardAction,
-  DashboardContextType,
-  ProcessedData
+  DashboardContextType
 } from '@/types/dashboard';
+import type { ProcessedData } from '@/types/index';
 
 // Export these types and constants
 export const STORAGE_KEYS = {
@@ -66,6 +67,23 @@ const dashboardReducer = (state: DashboardState, action: DashboardAction): Dashb
           ...state.fileStatus,
           [action.payload.source]: action.payload.status
         }
+      };
+    case 'UPDATE_PLAYER_MINUTES':
+      return {
+        ...state,
+        players: state.players.map(player => 
+          player.name === action.payload.playerName
+            ? {
+                ...player,
+                minutes: action.payload.minutes,
+                stats: scaleStats(
+                  player.original.stats, 
+                  player.original.minutes, 
+                  action.payload.minutes
+                )
+              }
+            : player
+        )
       };
     default:
       return state;

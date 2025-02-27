@@ -4,50 +4,77 @@ import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, AlertCircle } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { ValidationWarning } from '@/components/ValidationWarning';
 import { cn } from '@/lib/utils';
-import type { DataSource, FileStatus } from '@/types/dashboard';
+import type { DataSource, FileStatus } from '@/types/index';
 
-interface FileUploadCardProps {
+export interface FileUploadCardProps {
+  /** The data source this uploader is for */
   source: DataSource;
+  /** Current status of the file upload */
   status: FileStatus;
+  /** Whether this data source is currently active */
   isActive: boolean;
+  /** Callback when a file is selected */
   onFileSelect: (file: File) => void;
+  /** Optional validation warnings to display */
+  validationWarnings?: string[];
+  /** Optional CSS class name */
   className?: string;
 }
 
+/**
+ * FileUploadCard component for handling file uploads with drag and drop
+ */
 export function FileUploadCard({ 
   source, 
   status, 
   isActive, 
   onFileSelect,
+  validationWarnings = [],
   className 
 }: FileUploadCardProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Handle drag over event
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
+  // Handle file drop
+  const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Early return if uploading or no file
+    if (status.isUploading) return;
     
     const file = e.dataTransfer.files[0];
     if (!file) return;
     
     onFileSelect(file);
-  }, [onFileSelect]);
+  }, [onFileSelect, status.isUploading]);
 
-  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle file input change
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
     onFileSelect(file);
+    
+    // Reset the input value to allow selecting the same file again
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   }, [onFileSelect]);
+
+  // Handle click to open file dialog
+  const handleClick = useCallback(() => {
+    if (!status.isUploading && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  }, [status.isUploading]);
 
   return (
     <Card className={cn("w-full", className)}>
@@ -61,9 +88,15 @@ export function FileUploadCard({
         )}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onClick={() => !status.isUploading && fileInputRef.current?.click()}
+        onClick={handleClick}
         role="button"
         tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
         aria-label={`Upload ${source} CSV file`}
       >
         <input
@@ -92,7 +125,7 @@ export function FileUploadCard({
         )}
         
         <div className="text-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm font-medium">
             {status.isUploading ? 'Processing...' : `Upload ${source} CSV`}
           </p>
           {status.lastUpdate && (
@@ -110,6 +143,15 @@ export function FileUploadCard({
             {status.error}
           </AlertDescription>
         </Alert>
+      )}
+      
+      {validationWarnings.length > 0 && (
+        <ValidationWarning
+          type="messages"
+          title="Validation Warnings"
+          messages={validationWarnings}
+          className="mt-4"
+        />
       )}
     </Card>
   );

@@ -1,20 +1,31 @@
+/**
+ * File Upload Hook
+ * 
+ * This hook provides functionality for handling CSV file uploads,
+ * processing the data, and updating the application state.
+ */
+
 import { useCallback } from 'react';
-import { useDashboard, DataSource, ProcessedData } from '@/contexts/DashboardContext';
-import { parseCSV, processData } from '@/lib/data-processing';
-import { validateCSVFile, validateCSVHeaders, validateCSVRow } from '@/lib/validation';
+import { useDashboard } from '@/contexts/DashboardContext';
+import type { DataSource, ProcessedData } from '@/types/index';
+import { processCSVFile } from '@/lib/data-processing';
 import { savePlayersToStorage, saveFileStatusToStorage } from '@/lib/storage';
 
+/**
+ * Hook for handling file uploads and processing
+ * @returns Object containing file upload functions and status
+ */
 export const useFileUpload = () => {
   const { state, dispatch } = useDashboard();
 
-  const processFile = useCallback(async (file: File, source: DataSource) => {
+  /**
+   * Process a file upload and update application state
+   * @param file - The file to process
+   * @param source - The data source type
+   * @returns A promise that resolves to the processed data
+   */
+  const processFile = useCallback(async (file: File, source: DataSource): Promise<ProcessedData> => {
     try {
-      // Initial file validation
-      const fileValidation = validateCSVFile(file);
-      if (!fileValidation.isValid) {
-        throw new Error(fileValidation.error);
-      }
-
       // Update upload status
       dispatch({
         type: 'UPDATE_FILE_STATUS',
@@ -24,56 +35,34 @@ export const useFileUpload = () => {
         }
       });
 
-      // Parse CSV
-      const data = await parseCSV(file);
-
-      // Validate headers
-      const headerValidation = validateCSVHeaders(Object.keys(data[0] || {}), source);
-      if (!headerValidation.isValid) {
-        throw new Error(headerValidation.error);
-      }
-
-      // Validate and process rows
-      const errors: string[] = [];
-      const validRows = data.filter((row, index) => {
-        const rowValidation = validateCSVRow(row, source);
-        if (!rowValidation.isValid && rowValidation.error) {
-          errors.push(`Row ${index + 1}: ${rowValidation.error}`);
-          return false;
-        }
-        return true;
-      });
-
-      // Process valid data
-      const processedData = processData(validRows, source);
-
-      // Update state and storage
+      // Process file
+      const result = await processCSVFile(file, source);
+      
+      // Update timestamp
       const now = new Date();
       const timestamp = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
-
-      dispatch({ type: 'SET_PLAYERS', payload: processedData });
+      
+      const updatedStatus = {
+        lastUpdate: timestamp,
+        isUploading: false,
+        error: result.errors?.length ? `Processed with ${result.errors.length} errors` : null
+      };
+      
+      // Update state
+      dispatch({ type: 'SET_PLAYERS', payload: result.stats });
       dispatch({
         type: 'UPDATE_FILE_STATUS',
         payload: {
           source,
-          status: {
-            lastUpdate: timestamp,
-            isUploading: false,
-            error: errors.length > 0 ? `Processed with ${errors.length} errors` : null
-          }
+          status: updatedStatus
         }
       });
 
       // Save to storage
-      savePlayersToStorage(processedData);
+      savePlayersToStorage(result.stats);
       saveFileStatusToStorage(state.fileStatus);
 
-      // Return processed data and any errors
-      return {
-        stats: processedData,
-        errors: errors.length > 0 ? errors : undefined
-      } as ProcessedData;
-
+      return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error processing file';
       

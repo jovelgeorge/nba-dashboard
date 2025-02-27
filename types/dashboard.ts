@@ -1,49 +1,20 @@
-export type DataSource = 'ETR' | 'UA';
+/**
+ * Dashboard-specific Type Definitions
+ * This module contains type definitions specific to the dashboard functionality.
+ * Common types are imported from the index.ts file.
+ */
 
-export interface Stats {
-  points: number;
-  rebounds: number;
-  assists: number;
-  steals: number;
-  blocks: number;
-  turnovers: number;
-  threePointers: number;
-}
+import type { DataSource, UnifiedStat, FileStatus } from './index';
 
-export interface UnifiedStat {
-  name: string;
-  position: string;
-  team: string;
-  opponent: string;
-  minutes: number;
-  stats: Stats;
-  original: {
-    minutes: number;
-    stats: Stats;
-  };
-}
-
-export interface FileValidationResult {
-  isValid: boolean;
-  error?: string;
-}
-
-export interface ProcessedData {
-  stats: UnifiedStat[];
-  errors?: string[];
-}
-
-export interface FileStatus {
-  isUploading: boolean;
-  error: string | null;
-  lastUpdate: string | null;
-}
+// Re-export common types for convenience
+export type { DataSource, UnifiedStat, FileStatus } from './index';
 
 export interface DashboardState {
   players: UnifiedStat[];
   selectedTeam: string | null;
   dataSource: DataSource;
   fileStatus: Record<DataSource, FileStatus>;
+  showDifferences?: boolean;
 }
 
 export interface DashboardContextType {
@@ -55,4 +26,6 @@ export type DashboardAction =
   | { type: 'SET_PLAYERS'; payload: UnifiedStat[] }
   | { type: 'SET_SELECTED_TEAM'; payload: string | null }
   | { type: 'SET_DATA_SOURCE'; payload: DataSource }
-  | { type: 'UPDATE_FILE_STATUS'; payload: { source: DataSource; status: FileStatus } }; 
+  | { type: 'SET_SHOW_DIFFERENCES'; payload: boolean }
+  | { type: 'UPDATE_FILE_STATUS'; payload: { source: DataSource; status: FileStatus } }
+  | { type: 'UPDATE_PLAYER_MINUTES'; payload: { playerName: string; minutes: number } }; 

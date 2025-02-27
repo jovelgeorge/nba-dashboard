@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { StatBox } from '@/components/ui/stats';
 import { MinutesInput } from './MinutesInput';
-import { STAT_LABELS } from '@/lib/stats';
+import { STAT_LABELS } from '@/lib/utils';
 import type { Player } from '@/types';
 import { validateMinuteAdjustment } from '@/lib/validation';
 
@@ -13,6 +14,7 @@ interface PlayerRowProps {
 export function PlayerRow({ player, allTeamPlayers }: PlayerRowProps) {
   const { dispatch, state } = useDashboard();
   const { stats, original } = player;
+  const [validationError, setValidationError] = useState<string | null>(null);
   
   const differences = {
     points: stats.points - original.stats.points,
@@ -39,10 +41,13 @@ export function PlayerRow({ player, allTeamPlayers }: PlayerRowProps) {
     );
 
     if (validation.isValid) {
+      setValidationError(null);
       dispatch({
         type: 'UPDATE_PLAYER_MINUTES',
         payload: { playerName: player.name, minutes }
       });
+    } else {
+      setValidationError(validation.error || 'Invalid minute adjustment');
     }
   };
 
@@ -57,6 +62,7 @@ export function PlayerRow({ player, allTeamPlayers }: PlayerRowProps) {
           minutes={player.minutes}
           originalMinutes={original.minutes}
           onChange={handleMinutesChange}
+          validationError={validationError}
         />
       </div>
       

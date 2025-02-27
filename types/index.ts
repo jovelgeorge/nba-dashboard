@@ -1,3 +1,10 @@
+/**
+ * Common Type Definitions
+ * This module contains all common type definitions used throughout the application.
+ */
+
+export type DataSource = 'ETR' | 'UA';
+
 export interface Stats {
   points: number;
   rebounds: number;
@@ -8,9 +15,11 @@ export interface Stats {
   threePointers: number;
 }
 
-export interface Player {
+export interface UnifiedStat {
   name: string;
+  position: string;
   team: string;
+  opponent: string;
   minutes: number;
   stats: Stats;
   original: {
@@ -19,9 +28,21 @@ export interface Player {
   };
 }
 
-export type DataSource = 'ETR' | 'UA';
-
 export interface FileStatus {
-  lastUpdate: Date | null;
+  isUploading: boolean;
   error: string | null;
-} 
+  lastUpdate: string | null;
+}
+
+export interface FileValidationResult {
+  isValid: boolean;
+  error?: string;
+}
+
+export interface ProcessedData {
+  stats: UnifiedStat[];
+  errors?: string[];
+}
+
+// For backward compatibility
+export type Player = UnifiedStat; 

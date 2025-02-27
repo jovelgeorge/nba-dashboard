@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { StatBox } from '@/components/ui/stats';
-import { calculateTeamTotals, calculateStatDifferences, calculateTeamMinutes, STAT_LABELS } from '@/lib/stats';
+import { calculateTeamTotals, calculateStatDifferences, calculateTeamMinutes, STAT_LABELS } from '@/lib/utils';
 import type { Player } from '@/types';
 
 interface TeamStatsProps {

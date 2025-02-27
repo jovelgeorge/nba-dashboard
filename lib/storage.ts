@@ -1,5 +1,23 @@
-import { UnifiedStat, FileStatus, STORAGE_KEYS, DataSource } from '../contexts/DashboardContext';
+/**
+ * Storage Module
+ * 
+ * This module provides functions for storing and retrieving data from localStorage.
+ */
 
+import type { UnifiedStat, FileStatus, DataSource } from '@/types/index';
+
+// Storage keys
+export const STORAGE_KEYS = {
+  PLAYERS: 'players',
+  SELECTED_TEAM: 'selectedTeam',
+  DATA_SOURCE: 'dataSource',
+  FILE_STATUS: 'fileStatus',
+  SHOW_DIFFERENCES: 'showDifferences'
+};
+
+/**
+ * Saves player data to localStorage
+ */
 export const savePlayersToStorage = (players: UnifiedStat[]) => {
   try {
     localStorage.setItem(STORAGE_KEYS.PLAYERS, JSON.stringify(players));
@@ -8,6 +26,9 @@ export const savePlayersToStorage = (players: UnifiedStat[]) => {
   }
 };
 
+/**
+ * Gets player data from localStorage
+ */
 export const getPlayersFromStorage = (): UnifiedStat[] => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.PLAYERS);
@@ -18,7 +39,10 @@ export const getPlayersFromStorage = (): UnifiedStat[] => {
   }
 };
 
-export const saveFileStatusToStorage = (status: FileStatus) => {
+/**
+ * Saves file status to localStorage
+ */
+export const saveFileStatusToStorage = (status: Record<DataSource, FileStatus>) => {
   try {
     localStorage.setItem(STORAGE_KEYS.FILE_STATUS, JSON.stringify(status));
   } catch (error) {
@@ -26,7 +50,10 @@ export const saveFileStatusToStorage = (status: FileStatus) => {
   }
 };
 
-export const getFileStatusFromStorage = (): FileStatus | null => {
+/**
+ * Gets file status from localStorage
+ */
+export const getFileStatusFromStorage = (): Record<DataSource, FileStatus> | null => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.FILE_STATUS);
     return data ? JSON.parse(data) : null;
@@ -36,6 +63,9 @@ export const getFileStatusFromStorage = (): FileStatus | null => {
   }
 };
 
+/**
+ * Saves selected team to localStorage
+ */
 export const saveSelectedTeamToStorage = (team: string | null) => {
   try {
     localStorage.setItem(STORAGE_KEYS.SELECTED_TEAM, team || '');
@@ -44,6 +74,9 @@ export const saveSelectedTeamToStorage = (team: string | null) => {
   }
 };
 
+/**
+ * Gets selected team from localStorage
+ */
 export const getSelectedTeamFromStorage = (): string | null => {
   try {
     const team = localStorage.getItem(STORAGE_KEYS.SELECTED_TEAM);
@@ -54,6 +87,9 @@ export const getSelectedTeamFromStorage = (): string | null => {
   }
 };
 
+/**
+ * Saves data source to localStorage
+ */
 export const saveDataSourceToStorage = (source: DataSource): void => {
   try {
     localStorage.setItem(STORAGE_KEYS.DATA_SOURCE, source);
@@ -62,16 +98,22 @@ export const saveDataSourceToStorage = (source: DataSource): void => {
   }
 };
 
+/**
+ * Gets data source from localStorage
+ */
 export const getDataSourceFromStorage = (): DataSource | null => {
   try {
-    const source = localStorage.getItem(STORAGE_KEYS.DATA_SOURCE);
-    return source as DataSource | null;
+    const source = localStorage.getItem(STORAGE_KEYS.DATA_SOURCE) as DataSource;
+    return source || null;
   } catch (error) {
     console.error('Error getting data source from storage:', error);
     return null;
   }
 };
 
+/**
+ * Saves show differences setting to localStorage
+ */
 export const saveShowDifferencesToStorage = (show: boolean): void => {
   try {
     localStorage.setItem(STORAGE_KEYS.SHOW_DIFFERENCES, JSON.stringify(show));
@@ -80,22 +122,30 @@ export const saveShowDifferencesToStorage = (show: boolean): void => {
   }
 };
 
+/**
+ * Gets show differences setting from localStorage
+ */
 export const getShowDifferencesFromStorage = (): boolean => {
   try {
-    const show = localStorage.getItem(STORAGE_KEYS.SHOW_DIFFERENCES);
-    return show ? JSON.parse(show) : false;
+    const data = localStorage.getItem(STORAGE_KEYS.SHOW_DIFFERENCES);
+    return data ? JSON.parse(data) : false;
   } catch (error) {
     console.error('Error getting show differences from storage:', error);
     return false;
   }
 };
 
+/**
+ * Clears all stored data from localStorage
+ */
 export const clearStoredData = (): void => {
   try {
-    Object.values(STORAGE_KEYS).forEach(key => {
-      localStorage.removeItem(key);
-    });
+    localStorage.removeItem(STORAGE_KEYS.PLAYERS);
+    localStorage.removeItem(STORAGE_KEYS.SELECTED_TEAM);
+    localStorage.removeItem(STORAGE_KEYS.DATA_SOURCE);
+    localStorage.removeItem(STORAGE_KEYS.FILE_STATUS);
+    localStorage.removeItem(STORAGE_KEYS.SHOW_DIFFERENCES);
   } catch (error) {
-    console.error('Error clearing storage:', error);
+    console.error('Error clearing stored data:', error);
   }
 }; 

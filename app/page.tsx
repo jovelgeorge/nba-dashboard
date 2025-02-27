@@ -6,6 +6,7 @@ import { SourceSelector } from '@/components/dashboard/DataSource';
 import { TeamSelector } from '@/components/dashboard/TeamSelector';
 import { TeamSection } from '@/components/dashboard/TeamStats';
 import { useDashboard } from '@/contexts/DashboardContext';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 function Dashboard() {
   const { state } = useDashboard();
@@ -22,16 +23,26 @@ function Dashboard() {
         </div>
         
         <div className="grid gap-6">
-          <FileUploadSection />
+          <ErrorBoundary>
+            <FileUploadSection />
+          </ErrorBoundary>
           
           {hasData && (
             <>
               <div className="grid gap-4 md:grid-cols-2">
-                <SourceSelector />
-                <TeamSelector />
+                <ErrorBoundary>
+                  <SourceSelector />
+                </ErrorBoundary>
+                <ErrorBoundary>
+                  <TeamSelector />
+                </ErrorBoundary>
               </div>
               
-              {state.selectedTeam && <TeamSection />}
+              {state.selectedTeam && (
+                <ErrorBoundary>
+                  <TeamSection />
+                </ErrorBoundary>
+              )}
             </>
           )}
         </div>
@@ -42,8 +53,10 @@ function Dashboard() {
 
 export default function Home() {
   return (
-    <DashboardProvider>
-      <Dashboard />
-    </DashboardProvider>
+    <ErrorBoundary>
+      <DashboardProvider>
+        <Dashboard />
+      </DashboardProvider>
+    </ErrorBoundary>
   );
 }

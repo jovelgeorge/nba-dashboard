@@ -1,6 +1,6 @@
 import { useDashboard } from '@/contexts/DashboardContext';
 import { StatBox } from '@/components/ui/stats';
-import { calculateTeamMinutes } from '@/lib/stats';
+import { calculateTeamMinutes } from '@/lib/utils';
 import type { Player } from '@/types';
 
 interface TeamHeaderProps {

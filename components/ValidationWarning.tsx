@@ -1,38 +1,87 @@
+/**
+ * ValidationWarning Component
+ * 
+ * A flexible warning component that can display different types of validation warnings.
+ * It supports both simple message lists and complex validation results with team minute validations.
+ */
+
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { ValidationResult } from '@/lib/validation';
+import { AlertTriangle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { ValidationResult } from '@/lib/validation';
 
-interface ValidationWarningProps {
-  validation: ValidationResult;
-}
+export type ValidationWarningProps = 
+  | { 
+      type: 'minutes'; 
+      validation: ValidationResult;
+      className?: string;
+    }
+  | { 
+      type: 'messages'; 
+      title?: string;
+      messages: string[];
+      className?: string;
+    };
 
-export const ValidationWarning = ({ validation }: ValidationWarningProps) => {
-  if (validation.isValid) {
+export const ValidationWarning = (props: ValidationWarningProps) => {
+  // No validation issues, don't render anything
+  if (
+    (props.type === 'minutes' && props.validation.isValid) ||
+    (props.type === 'messages' && props.messages.length === 0)
+  ) {
     return null;
   }
 
+  // Common styles
+  const alertClassNames = cn(
+    "border-yellow-500 bg-yellow-500/10",
+    props.className
+  );
+
+  if (props.type === 'messages') {
+    return (
+      <Alert className={alertClassNames}>
+        <AlertTriangle className="h-4 w-4 text-yellow-500" />
+        {props.title && (
+          <AlertTitle className="ml-2 text-yellow-700 font-medium">
+            {props.title}
+          </AlertTitle>
+        )}
+        <AlertDescription className="ml-2 text-yellow-700">
+          <ul className="list-disc list-inside space-y-1">
+            {props.messages.map((message, index) => (
+              <li key={index} className="text-sm">
+                {message}
+              </li>
+            ))}
+          </ul>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  // Minutes validation type
   return (
-    <Alert 
-      variant="default" 
-      className="mb-4 bg-yellow-50/80 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800/50"
-    >
-      <AlertTitle className="text-yellow-800 dark:text-yellow-300 font-medium">
+    <Alert className={alertClassNames}>
+      <AlertTriangle className="h-4 w-4 text-yellow-500" />
+      <AlertTitle className="ml-2 text-yellow-700 font-medium">
         Minutes Distribution
       </AlertTitle>
-      <AlertDescription className="text-yellow-700 dark:text-yellow-400/90">
+      <AlertDescription className="ml-2 text-yellow-700">
         <div className="space-y-2">
           <p className="font-medium">
-            Team total: {validation.totalMinutes}/240 minutes
-            {validation.minutesDifference !== 0 && (
+            Team total: {props.validation.totalMinutes}/240 minutes
+            {props.validation.minutesDifference !== 0 && (
               <span className="font-normal">
                 {' '}
-                ({validation.minutesDifference > 0 ? '+' : ''}
-                {validation.minutesDifference} minutes)
+                ({props.validation.minutesDifference > 0 ? '+' : ''}
+                {props.validation.minutesDifference} minutes)
               </span>
             )}
           </p>
-          {validation.playerErrors.length > 0 && (
+          {props.validation.playerErrors.length > 0 && (
             <ul className="list-disc list-inside space-y-1 text-sm opacity-90">
-              {validation.playerErrors.map((error, index) => (
+              {props.validation.playerErrors.map((error, index) => (
                 <li key={index} className="font-normal">
                   {error.playerName}: {error.error}
                 </li>
