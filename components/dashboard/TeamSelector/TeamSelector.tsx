@@ -1,5 +1,4 @@
 import React from 'react';
-import { Card } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -14,7 +13,7 @@ export function TeamSelector() {
   
   // Get unique teams from players array and sort them
   const teams = React.useMemo(() => {
-    const uniqueTeams = [...new Set(state.players.map(p => p.team))];
+    const uniqueTeams = Array.from(new Set(state.players.map(p => p.team)));
     return uniqueTeams.sort();
   }, [state.players]);
 
@@ -25,27 +24,25 @@ export function TeamSelector() {
   if (!state.players.length) return null;
 
   return (
-    <Card className="p-4">
-      <div className="space-y-2">
-        <h3 className="text-sm font-medium text-muted-foreground">
-          Select Team
-        </h3>
-        <Select
-          value={state.selectedTeam || ''}
-          onValueChange={handleTeamSelect}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a team" />
-          </SelectTrigger>
-          <SelectContent>
-            {teams.map(team => (
-              <SelectItem key={team} value={team}>
-                {team}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </Card>
+    <div className="space-y-2">
+      <h3 className="text-sm font-medium text-muted-foreground">
+        Select Team
+      </h3>
+      <Select
+        value={state.selectedTeam || ''}
+        onValueChange={handleTeamSelect}
+      >
+        <SelectTrigger className="w-[200px]">
+          <SelectValue placeholder="Select a team" />
+        </SelectTrigger>
+        <SelectContent>
+          {teams.map(team => (
+            <SelectItem key={team} value={team}>
+              {team}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }

@@ -8,8 +8,7 @@ import type { Player } from '@/types';
 
 // Component exports
 export { PlayerList } from './PlayerList';
-export { PlayerRow } from './PlayerRow';
-export { PlayerStats } from './PlayerStats';
+export { PlayerCard } from './PlayerCard';
 export { MinutesInput } from './MinutesInput';
 
 // Type exports
@@ -17,11 +16,7 @@ export interface PlayerListProps {
   players: Player[];
 }
 
-export interface PlayerRowProps {
-  player: Player;
-}
-
-export interface PlayerStatsProps {
+export interface PlayerCardProps {
   player: Player;
 }
 

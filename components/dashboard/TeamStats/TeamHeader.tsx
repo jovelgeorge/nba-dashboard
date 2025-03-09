@@ -1,5 +1,5 @@
 import { useDashboard } from '@/contexts/DashboardContext';
-import { StatBox } from '@/components/ui/stats';
+import { StatBox } from '@/components/ui/stats/StatBox';
 import { usePlayerStats } from '@/hooks';
 import type { TeamHeaderProps } from '.';
 

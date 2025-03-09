@@ -3,7 +3,6 @@
  * This module exports all components related to team statistics display and manipulation.
  */
 
-import { Card } from '@/components/ui/card';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { LoadingOverlay } from '../Layout/LoadingOverlay';
 import { TeamHeader } from './TeamHeader';
@@ -24,7 +23,20 @@ export interface TeamStatsProps {
   players: Player[];
 }
 
-// TeamSection component definition and export
+/**
+ * TeamSection Component
+ * 
+ * Primary container for all team-related components in the dashboard.
+ * This component implements the new integrated design approach, combining
+ * team header, stats, and player listings in a cohesive layout with improved
+ * visual hierarchy.
+ * 
+ * Features:
+ * - Unified container for team information
+ * - Integrated loading state management
+ * - Logical grouping of related components
+ * - Enhanced visual structure with sectioned content
+ */
 export function TeamSection() {
   const { state } = useDashboard();
   const { selectedTeam, players, fileStatus } = state;
@@ -40,19 +52,25 @@ export function TeamSection() {
 
   return (
     <div className="space-y-6">
-      <Card className="p-6 relative">
+      <div className="bg-card rounded-lg border shadow-sm relative">
         <LoadingOverlay 
           isLoading={isLoading}
           message="Loading team data..."
         />
-        <TeamHeader team={selectedTeam} />
-      </Card>
+        
+        <div className="p-6 border-b">
+          <TeamHeader team={selectedTeam} />
+        </div>
+        
+        <div className="p-6">
+          <TeamStats players={teamPlayers} />
+        </div>
+      </div>
       
-      <TeamStats players={teamPlayers} />
-      
-      <Card className="p-6">
+      <div className="bg-card rounded-lg border shadow-sm p-6">
+        <h3 className="text-xl font-semibold mb-4">Player Adjustments</h3>
         <PlayerList players={teamPlayers} />
-      </Card>
+      </div>
     </div>
   );
 } 

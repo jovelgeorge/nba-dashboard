@@ -2,7 +2,7 @@
 import React, { useCallback, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Upload, AlertCircle } from 'lucide-react';
+import { Upload, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ValidationWarning } from '@/components/ValidationWarning';
 import { cn } from '@/lib/utils';
@@ -48,6 +48,12 @@ export function FileUploadCard({
     const file = e.dataTransfer.files[0];
     if (!file) return;
     
+    // Check if file is CSV
+    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+      alert('Please upload a CSV file');
+      return;
+    }
+    
     onFileSelect(file);
   }, [onFileSelect, status.isUploading]);
 
@@ -58,95 +64,85 @@ export function FileUploadCard({
     
     onFileSelect(file);
     
-    // Reset the input value to allow selecting the same file again
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    // Reset the input value so the same file can be uploaded again if needed
+    e.target.value = '';
   }, [onFileSelect]);
 
-  // Handle click to open file dialog
-  const handleClick = useCallback(() => {
-    if (!status.isUploading && fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+  // Handle click on the card to trigger file input
+  const handleCardClick = useCallback(() => {
+    if (status.isUploading) return;
+    fileInputRef.current?.click();
   }, [status.isUploading]);
 
+  // Determine card status classes
+  const cardClasses = cn(
+    "relative overflow-hidden transition-all duration-200",
+    "border-2 rounded-lg p-6",
+    status.isUploading && "opacity-80",
+    isActive && status.lastUpdate && "border-primary",
+    !status.lastUpdate && "border-dashed",
+    className
+  );
+
   return (
-    <Card className={cn("w-full", className)}>
-      <div
-        className={cn(
-          "relative flex flex-col items-center justify-center",
-          "w-full h-32 p-4 border-2 border-dashed rounded-lg",
-          "transition-colors duration-200",
-          status.isUploading ? "opacity-50 cursor-wait" : "cursor-pointer hover:border-primary",
-          status.error ? "border-red-500" : isActive ? "border-primary" : "border-muted"
-        )}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        onClick={handleClick}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleClick();
-          }
-        }}
-        aria-label={`Upload ${source} CSV file`}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          className="hidden"
-          accept=".csv"
-          onChange={handleFileChange}
-          disabled={status.isUploading}
-          aria-label="File input"
-        />
-        
+    <Card 
+      className={cardClasses}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      onClick={handleCardClick}
+    >
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept=".csv"
+        className="hidden"
+        disabled={status.isUploading}
+      />
+      
+      <div className="flex flex-col items-center justify-center text-center space-y-4">
         {status.isUploading ? (
-          <LoadingSpinner 
-            size="lg"
-            className="text-primary mb-2"
-          />
+          <LoadingSpinner size="lg" />
+        ) : status.lastUpdate ? (
+          <CheckCircle2 className="h-12 w-12 text-primary" />
         ) : (
-          <Upload 
-            className={cn(
-              "w-8 h-8 mb-2",
-              status.error ? "text-red-500" : isActive ? "text-primary" : "text-muted-foreground"
-            )}
-            aria-hidden="true"
-          />
+          <Upload className="h-12 w-12 text-muted-foreground" />
         )}
         
-        <div className="text-center">
-          <p className="text-sm font-medium">
-            {status.isUploading ? 'Processing...' : `Upload ${source} CSV`}
-          </p>
-          {status.lastUpdate && (
-            <p className="text-xs text-muted-foreground mt-1">
-              Last update: {status.lastUpdate}
+        <div className="space-y-2">
+          <h3 className="font-semibold text-lg">{source} Projections</h3>
+          
+          {status.lastUpdate ? (
+            <p className="text-sm text-muted-foreground">
+              Last updated: {status.lastUpdate}
+              <br />
+              Click to upload a new file
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Drag & drop or click to upload a CSV file
             </p>
           )}
         </div>
       </div>
-
+      
       {status.error && (
         <Alert variant="destructive" className="mt-4">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="ml-2">
+          <AlertDescription>
             {status.error}
           </AlertDescription>
         </Alert>
       )}
       
       {validationWarnings.length > 0 && (
-        <ValidationWarning
-          type="messages"
-          title="Validation Warnings"
-          messages={validationWarnings}
-          className="mt-4"
-        />
+        <div className="mt-4">
+          <ValidationWarning 
+            type="messages" 
+            title="Validation Warnings"
+            messages={validationWarnings}
+          />
+        </div>
       )}
     </Card>
   );

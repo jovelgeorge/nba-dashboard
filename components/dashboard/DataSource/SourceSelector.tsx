@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { LoadingOverlay } from '../Layout/LoadingOverlay';
@@ -24,29 +23,34 @@ export function SourceSelector() {
   }, [dispatch, state.fileStatus]);
 
   return (
-    <Card className="p-4 relative">
+    <div className="relative">
       <LoadingOverlay 
         isLoading={isSwitching}
         message="Switching data source..."
       />
       
-      <div className="flex gap-4">
-        {(['ETR', 'UA'] as const).map(source => (
-          <Button
-            key={source}
-            variant={state.dataSource === source ? "default" : "outline"}
-            disabled={!state.fileStatus[source].lastUpdate || isSwitching}
-            onClick={() => handleSourceSwitch(source)}
-            className="relative"
-          >
-            <div className={cn(
-              "absolute top-1 right-1 w-2 h-2 rounded-full",
-              state.fileStatus[source].lastUpdate ? "bg-green-500" : "bg-gray-300"
-            )} />
-            {source} Projections
-          </Button>
-        ))}
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium text-muted-foreground">
+          Data Source
+        </h3>
+        <div className="flex gap-4">
+          {(['ETR', 'UA'] as const).map(source => (
+            <Button
+              key={source}
+              variant={state.dataSource === source ? "default" : "outline"}
+              disabled={!state.fileStatus[source].lastUpdate || isSwitching}
+              onClick={() => handleSourceSwitch(source)}
+              className="relative"
+            >
+              <div className={cn(
+                "absolute top-1 right-1 w-2 h-2 rounded-full",
+                state.fileStatus[source].lastUpdate ? "bg-green-500" : "bg-gray-300"
+              )} />
+              {source} Projections
+            </Button>
+          ))}
+        </div>
       </div>
-    </Card>
+    </div>
   );
 } 
