@@ -1,18 +1,15 @@
 import { useDashboard } from '@/contexts/DashboardContext';
 import { StatBox } from '@/components/ui/stats';
-import { calculateTeamMinutes } from '@/lib/utils';
-import type { Player } from '@/types';
+import { usePlayerStats } from '@/hooks';
+import type { TeamHeaderProps } from '.';
 
-interface TeamHeaderProps {
-  team: string;
-  players: Player[];
-}
-
-export function TeamHeader({ team, players }: TeamHeaderProps) {
+export function TeamHeader({ team }: TeamHeaderProps) {
   const { state } = useDashboard();
   const { dataSource } = state;
+  const { getCurrentTeamMinutes, getTeamMinutesDifference } = usePlayerStats();
   
-  const { current: totalMinutes, difference: minutesDifference } = calculateTeamMinutes(players);
+  const totalMinutes = getCurrentTeamMinutes(team);
+  const minutesDifference = getTeamMinutesDifference(team);
 
   return (
     <div className="flex items-center justify-between">

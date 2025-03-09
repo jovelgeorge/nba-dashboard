@@ -1,15 +1,19 @@
-import { UnifiedStat, DataSource, FileValidationResult } from '../contexts/DashboardContext';
+/**
+ * Validation Utilities
+ * This module contains functions for validating data and user inputs.
+ */
+
+import type { 
+  Player,
+  DataSource, 
+  FileValidationResult, 
+  MinuteValidationResult,
+  TeamMinutesValidation
+} from '@/types';
 
 export const TEAM_MINUTE_LIMIT = 240;
 export const MIN_PLAYER_MINUTES = 0;
 export const MAX_PLAYER_MINUTES = 48;
-
-export type ValidationResult = {
-  isValid: boolean;
-  totalMinutes: number;
-  minutesDifference: number;
-  playerErrors: PlayerValidationError[];
-};
 
 export type PlayerValidationError = {
   playerName: string;
@@ -17,25 +21,24 @@ export type PlayerValidationError = {
   error: string;
 };
 
-export const validateTeamMinutes = (players: UnifiedStat[], selectedTeam: string): ValidationResult => {
+/**
+ * Validates that a team's total minutes equal the regulation value.
+ */
+export const validateTeamMinutes = (players: Player[], selectedTeam: string): TeamMinutesValidation => {
   const teamPlayers = players.filter(player => player.team === selectedTeam);
-  const playerErrors: PlayerValidationError[] = [];
+  const playerErrors: string[] = [];
   let totalMinutes = 0;
 
   // Validate individual player minutes
   teamPlayers.forEach(player => {
     if (player.minutes < MIN_PLAYER_MINUTES) {
-      playerErrors.push({
-        playerName: player.name,
-        minutes: player.minutes,
-        error: `Minutes cannot be less than ${MIN_PLAYER_MINUTES}`,
-      });
+      playerErrors.push(
+        `${player.name}: Minutes cannot be less than ${MIN_PLAYER_MINUTES}`
+      );
     } else if (player.minutes > MAX_PLAYER_MINUTES) {
-      playerErrors.push({
-        playerName: player.name,
-        minutes: player.minutes,
-        error: `Minutes cannot exceed ${MAX_PLAYER_MINUTES}`,
-      });
+      playerErrors.push(
+        `${player.name}: Minutes cannot exceed ${MAX_PLAYER_MINUTES}`
+      );
     }
     totalMinutes += player.minutes;
   });
@@ -45,11 +48,9 @@ export const validateTeamMinutes = (players: UnifiedStat[], selectedTeam: string
 
   // Add team total validation error if needed
   if (totalMinutes !== TEAM_MINUTE_LIMIT) {
-    playerErrors.push({
-      playerName: 'Team Total',
-      minutes: totalMinutes,
-      error: `Team minutes must equal ${TEAM_MINUTE_LIMIT} (current: ${totalMinutes})`,
-    });
+    playerErrors.push(
+      `Team Total: Team minutes must equal ${TEAM_MINUTE_LIMIT} (current: ${totalMinutes})`
+    );
   }
 
   return {
@@ -60,13 +61,16 @@ export const validateTeamMinutes = (players: UnifiedStat[], selectedTeam: string
   };
 };
 
+/**
+ * Validates a minute adjustment to ensure it doesn't violate constraints.
+ */
 export const validateMinuteAdjustment = (
   currentMinutes: number,
   newMinutes: number,
   teamTotalMinutes: number,
   selectedTeam: string,
-  allPlayers?: UnifiedStat[]
-): { isValid: boolean; error?: string } => {
+  allPlayers?: Player[]
+): MinuteValidationResult => {
   if (newMinutes < MIN_PLAYER_MINUTES) {
     return {
       isValid: false,
@@ -90,7 +94,7 @@ export const validateMinuteAdjustment = (
         error: `Adjustment would exceed team limit of ${TEAM_MINUTE_LIMIT} minutes`,
       };
     }
-    return { isValid: true };
+    return { isValid: true, error: null };
   }
 
   // If we have the full players array, validate using the filtered team players
@@ -106,11 +110,11 @@ export const validateMinuteAdjustment = (
     };
   }
 
-  return { isValid: true };
+  return { isValid: true, error: null };
 };
 
 export const suggestMinuteDistribution = (
-  players: UnifiedStat[],
+  players: Player[],
   targetMinutes: number,
   selectedTeam: string
 ): { [key: string]: number } => {

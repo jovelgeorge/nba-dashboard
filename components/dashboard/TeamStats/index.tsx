@@ -9,10 +9,22 @@ import { LoadingOverlay } from '../Layout/LoadingOverlay';
 import { TeamHeader } from './TeamHeader';
 import { TeamStats } from './TeamStats';
 import { PlayerList } from '../PlayerStats';
+import type { Player } from '@/types';
 
+// Component exports
 export { TeamHeader } from './TeamHeader';
 export { TeamStats } from './TeamStats';
 
+// Type exports
+export interface TeamHeaderProps {
+  team: string;
+}
+
+export interface TeamStatsProps {
+  players: Player[];
+}
+
+// TeamSection component definition and export
 export function TeamSection() {
   const { state } = useDashboard();
   const { selectedTeam, players, fileStatus } = state;
@@ -33,7 +45,7 @@ export function TeamSection() {
           isLoading={isLoading}
           message="Loading team data..."
         />
-        <TeamHeader team={selectedTeam} players={teamPlayers} />
+        <TeamHeader team={selectedTeam} />
       </Card>
       
       <TeamStats players={teamPlayers} />

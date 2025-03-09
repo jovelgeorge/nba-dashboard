@@ -1,17 +1,18 @@
 /**
  * Data Processing Module
  * 
- * This module handles all CSV file processing for the NBA dashboard application.
- * It includes functions for parsing, validating, and transforming player statistics data
+ * This module handles all CSV file processing and data calculations for the NBA dashboard application.
+ * It includes functions for parsing, validating, transforming, and calculating player statistics data
  * from various sources into a unified format.
  */
 
 import Papa from 'papaparse';
 import type { 
-  UnifiedStat, 
+  Stats,
+  Player, 
   DataSource, 
   ProcessedData
-} from '@/types/index';
+} from '@/types';
 import { validateCSVFile, validateCSVHeaders, validateCSVRow } from './validation';
 
 /**
@@ -154,7 +155,7 @@ export const parseCSV = (file: File): Promise<RawCSVRow[]> => {
  * @param row - The raw CSV row data
  * @returns The processed unified stat object
  */
-export const processRow = (row: RawCSVRow): UnifiedStat => {
+export const processRow = (row: RawCSVRow): Player => {
   const minutes = parseFloat(convertToString(row.minutes || row.min));
   const processedStats = {
     points: parseFloat(convertToString(row.points || row.pts)),
@@ -186,7 +187,7 @@ export const processRow = (row: RawCSVRow): UnifiedStat => {
  * @param rows - The raw CSV rows to process
  * @returns An array of unified stat objects
  */
-export const processData = (rows: RawCSVRow[]): UnifiedStat[] => {
+export const processData = (rows: RawCSVRow[]): Player[] => {
   return rows.map(processRow);
 };
 
@@ -221,7 +222,7 @@ export const processCSVFile = async (
       throw new CSVProcessingError(headerValidation.error || 'Invalid headers');
     }
 
-    const stats: UnifiedStat[] = [];
+    const stats: Player[] = [];
     const errors: string[] = [];
 
     // Validate and process rows
@@ -274,30 +275,134 @@ export const processCSVFile = async (
 };
 
 /**
- * Groups player stats by team
+ * Scales player statistics based on minutes adjustment
  * 
- * @param players - The array of player stats to group
- * @returns An object mapping team names to arrays of player stats
+ * @param originalStats - The original player statistics
+ * @param originalMinutes - The original minutes played
+ * @param newMinutes - The new minutes to adjust to
+ * @returns Scaled player statistics
  */
-export const groupByTeam = (players: UnifiedStat[]): { [key: string]: UnifiedStat[] } => {
-  return players.reduce((groups, player) => {
-    const team = player.team;
-    if (!groups[team]) {
-      groups[team] = [];
+export function scaleStats(
+  originalStats: Stats, 
+  originalMinutes: number, 
+  newMinutes: number
+): Stats {
+  if (originalMinutes === 0) {
+    return { ...originalStats };
+  }
+  
+  const scaleFactor = newMinutes / originalMinutes;
+  
+  return {
+    points: roundStat(originalStats.points * scaleFactor),
+    rebounds: roundStat(originalStats.rebounds * scaleFactor),
+    assists: roundStat(originalStats.assists * scaleFactor),
+    steals: roundStat(originalStats.steals * scaleFactor),
+    blocks: roundStat(originalStats.blocks * scaleFactor),
+    turnovers: roundStat(originalStats.turnovers * scaleFactor),
+    threePointers: roundStat(originalStats.threePointers * scaleFactor),
+  };
+}
+
+/**
+ * Rounds a statistical value to one decimal place
+ * 
+ * @param value - The value to round
+ * @returns Rounded value
+ */
+export function roundStat(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+/**
+ * Calculates total team statistics
+ * 
+ * @param players - The array of players to calculate totals for
+ * @returns Combined statistics for the team
+ */
+export function calculateTeamTotals(players: { stats: Stats }[]): Stats {
+  return players.reduce((totals, player) => ({
+    points: roundStat(totals.points + player.stats.points),
+    rebounds: roundStat(totals.rebounds + player.stats.rebounds),
+    assists: roundStat(totals.assists + player.stats.assists),
+    steals: roundStat(totals.steals + player.stats.steals),
+    blocks: roundStat(totals.blocks + player.stats.blocks),
+    turnovers: roundStat(totals.turnovers + player.stats.turnovers),
+    threePointers: roundStat(totals.threePointers + player.stats.threePointers),
+  }), {
+    points: 0,
+    rebounds: 0, 
+    assists: 0,
+    steals: 0,
+    blocks: 0,
+    turnovers: 0,
+    threePointers: 0
+  });
+}
+
+/**
+ * Calculates differences between two stat objects
+ * 
+ * @param current - Current statistics
+ * @param original - Original statistics
+ * @returns Differences between current and original stats
+ */
+export function calculateStatDifferences(current: Stats, original: Stats): Stats {
+  return {
+    points: roundStat(current.points - original.points),
+    rebounds: roundStat(current.rebounds - original.rebounds),
+    assists: roundStat(current.assists - original.assists),
+    steals: roundStat(current.steals - original.steals),
+    blocks: roundStat(current.blocks - original.blocks),
+    turnovers: roundStat(current.turnovers - original.turnovers),
+    threePointers: roundStat(current.threePointers - original.threePointers),
+  };
+}
+
+/**
+ * Groups players by team
+ * 
+ * @param players - The array of all player stats
+ * @returns Object with teams as keys and arrays of players as values
+ */
+export const groupByTeam = (players: Player[]): { [key: string]: Player[] } => {
+  return players.reduce((teams, player) => {
+    if (!teams[player.team]) {
+      teams[player.team] = [];
     }
-    groups[team].push(player);
-    return groups;
-  }, {} as { [key: string]: UnifiedStat[] });
+    teams[player.team].push(player);
+    return teams;
+  }, {} as { [key: string]: Player[] });
 };
 
 /**
- * Calculates the total minutes played by a team
+ * Calculates team minutes statistics
+ * 
+ * @param players - The array of players to calculate minutes for
+ * @returns Object containing current, original, and difference in minutes
+ */
+export function calculateTeamMinutes(players: Player[]): {
+  current: number;
+  original: number;
+  difference: number;
+} {
+  const current = players.reduce((sum, p) => sum + p.minutes, 0);
+  const original = players.reduce((sum, p) => sum + p.original.minutes, 0);
+  return {
+    current,
+    original,
+    difference: current - original
+  };
+}
+
+/**
+ * Calculates total minutes for a specific team
  * 
  * @param players - The array of all player stats
  * @param selectedTeam - The team to calculate minutes for
  * @returns The total minutes played by the team
  */
-export const calculateTeamTotalMinutes = (players: UnifiedStat[], selectedTeam: string): number => {
+export const calculateTeamTotalMinutes = (players: Player[], selectedTeam: string): number => {
   return players
     .filter(player => player.team === selectedTeam)
     .reduce((total, player) => total + player.minutes, 0);

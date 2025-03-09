@@ -1,19 +1,16 @@
 // components/dashboard/FileUpload/types.ts
-import { DataSource, FileUploadStatus } from '@/contexts/DashboardContext';
+import type { DataSource, FileStatus } from '@/types';
 
-export interface FileUploadCardProps {
-  source: DataSource;
-  status: FileUploadStatus;
-  isActive: boolean;
-  onFileSelect: (file: File) => Promise<void>;
-}
+// Use the centralized FileUploadProps as the base interface
+export type { FileUploadProps } from '@/types';
 
+// Renamed from FileUploadCardProps to avoid duplication
 export interface UploadStatusProps {
-  status: FileUploadStatus;
+  status: FileStatus;
   source: DataSource;
 }
 
 export interface UploadIndicatorProps {
-  status: FileUploadStatus;
+  status: FileStatus;
   isActive: boolean;
 }

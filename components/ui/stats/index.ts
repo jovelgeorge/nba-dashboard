@@ -3,5 +3,10 @@
  * This module exports reusable statistic display components used throughout the dashboard.
  */
 
-export { StatBox, type StatBoxProps } from './StatBox';
-export { StatDisplay, type StatDisplayProps } from './StatDisplay'; 
+// Component exports
+export { StatBox } from './StatBox';
+export { StatDisplay } from './StatDisplay';
+
+// Type exports
+export type { StatBoxProps } from './StatBox';
+export type { StatDisplayProps } from './StatDisplay'; 

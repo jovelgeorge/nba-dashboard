@@ -2,13 +2,7 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils'; 
 import { AlertCircle } from 'lucide-react';
-
-interface MinutesInputProps {
-  minutes: number;
-  originalMinutes: number;
-  onChange: (minutes: number) => void;
-  validationError?: string | null;
-}
+import type { MinutesInputProps } from '.';
 
 export function MinutesInput({ 
   minutes, 

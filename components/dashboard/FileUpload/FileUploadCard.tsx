@@ -6,17 +6,12 @@ import { Upload, AlertCircle } from 'lucide-react';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ValidationWarning } from '@/components/ValidationWarning';
 import { cn } from '@/lib/utils';
-import type { DataSource, FileStatus } from '@/types/index';
+import type { FileUploadProps } from '@/types';
 
-export interface FileUploadCardProps {
-  /** The data source this uploader is for */
-  source: DataSource;
-  /** Current status of the file upload */
-  status: FileStatus;
-  /** Whether this data source is currently active */
-  isActive: boolean;
-  /** Callback when a file is selected */
-  onFileSelect: (file: File) => void;
+/**
+ * Extended version of the FileUploadProps with additional UI-specific properties
+ */
+export interface FileUploadCardProps extends FileUploadProps {
   /** Optional validation warnings to display */
   validationWarnings?: string[];
   /** Optional CSS class name */

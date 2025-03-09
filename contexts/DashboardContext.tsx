@@ -2,16 +2,16 @@ import React, { createContext, useContext, useReducer, useEffect, ReactNode } fr
 import { processCSVFile } from '@/lib/data-processing';
 import { scaleStats } from '@/lib/utils';
 import type { 
-  UnifiedStat, 
+  Player, 
   DataSource, 
   FileStatus, 
   DashboardState, 
   DashboardAction,
   DashboardContextType
 } from '@/types/dashboard';
-import type { ProcessedData } from '@/types/index';
+import type { ProcessedData } from '@/types';
 
-// Export these types and constants
+// Export these constants
 export const STORAGE_KEYS = {
   PLAYERS: 'players',
   SELECTED_TEAM: 'selectedTeam',
@@ -20,8 +20,8 @@ export const STORAGE_KEYS = {
   SHOW_DIFFERENCES: 'showDifferences'
 } as const;
 
-// Re-export types from types/dashboard.ts
-export type { UnifiedStat, FileStatus, DataSource } from '@/types/dashboard';
+// Re-export types from types/dashboard.ts for convenience
+export type { Player, FileStatus, DataSource } from '@/types/dashboard';
 
 const initialState: DashboardState = {
   players: [],
@@ -98,7 +98,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     const savedState = localStorage.getItem(STORAGE_KEYS.PLAYERS);
     if (savedState) {
       try {
-        const players = JSON.parse(savedState) as UnifiedStat[];
+        const players = JSON.parse(savedState) as Player[];
         dispatch({ type: 'SET_PLAYERS', payload: players });
       } catch (error) {
         console.error('Error loading saved players:', error);

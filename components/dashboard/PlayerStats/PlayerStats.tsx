@@ -1,53 +1,30 @@
 // components/dashboard/PlayerStats/PlayerStats.tsx
 import { useState } from 'react';
-import { useDashboard } from '@/contexts/DashboardContext';
 import { Card } from '@/components/ui/card';
 import { MinutesInput } from './MinutesInput';
 import { StatBox } from '@/components/ui/stats';
 import { STAT_LABELS } from '@/lib/utils';
-import { validateMinuteAdjustment } from '@/lib/validation';
+import { usePlayerStats } from '@/hooks';
 import type { Player } from '@/types';
 
 interface PlayerStatsProps {
   player: Player;
-  teamPlayers: Player[];
 }
 
-export function PlayerStats({ player, teamPlayers }: PlayerStatsProps) {
-  const { dispatch, state } = useDashboard();
+export function PlayerStats({ player }: PlayerStatsProps) {
+  const { getPlayerDifferences, updatePlayerMinutes } = usePlayerStats();
   const { stats, original } = player;
   const [validationError, setValidationError] = useState<string | null>(null);
   
-  const differences = {
-    points: stats.points - original.stats.points,
-    rebounds: stats.rebounds - original.stats.rebounds,
-    assists: stats.assists - original.stats.assists,
-    steals: stats.steals - original.stats.steals,
-    blocks: stats.blocks - original.stats.blocks,
-    turnovers: stats.turnovers - original.stats.turnovers,
-    threePointers: stats.threePointers - original.stats.threePointers,
-  };
+  // Get stat differences using our hook
+  const differences = getPlayerDifferences(player);
 
   const handleMinutesChange = (minutes: number) => {
-    const currentTeamMinutes = teamPlayers.reduce(
-      (sum, p) => sum + (p.name === player.name ? 0 : p.minutes),
-      0
-    );
-
-    const validation = validateMinuteAdjustment(
-      player.minutes,
-      minutes,
-      currentTeamMinutes,
-      player.team,
-      state.players
-    );
+    // Use our hook's updatePlayerMinutes function
+    const validation = updatePlayerMinutes(player.name, minutes);
 
     if (validation.isValid) {
       setValidationError(null);
-      dispatch({
-        type: 'UPDATE_PLAYER_MINUTES',
-        payload: { playerName: player.name, minutes }
-      });
     } else {
       setValidationError(validation.error || 'Invalid minute adjustment');
     }

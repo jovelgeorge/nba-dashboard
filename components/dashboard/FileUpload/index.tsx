@@ -9,7 +9,11 @@ import { useState, useCallback } from 'react';
 import { useDashboard } from '@/contexts/DashboardContext';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { FileUploadCard } from './FileUploadCard';
-import type { DataSource } from '@/types/index';
+import type { DataSource } from '@/types';
+
+// Export common components
+export { FileUploadCard } from './FileUploadCard';
+export type { FileUploadCardProps } from './FileUploadCard';
 
 export function FileUploadSection() {
   const { state } = useDashboard();

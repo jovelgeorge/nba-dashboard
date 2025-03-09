@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import { useDashboard } from '@/contexts/DashboardContext';
-import type { DataSource, ProcessedData } from '@/types/index';
+import type { DataSource, ProcessedData } from '@/types';
 import { processCSVFile } from '@/lib/data-processing';
 import { savePlayersToStorage, saveFileStatusToStorage } from '@/lib/storage';
 

@@ -1,6 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { StatBox } from '@/components/ui/stats';
-import { calculateTeamTotals, calculateStatDifferences, calculateTeamMinutes, STAT_LABELS } from '@/lib/utils';
+import { STAT_LABELS } from '@/lib/utils';
+import { usePlayerStats } from '@/hooks';
 import type { Player } from '@/types';
 
 interface TeamStatsProps {
@@ -8,21 +9,30 @@ interface TeamStatsProps {
 }
 
 export function TeamStats({ players }: TeamStatsProps) {
+  const { 
+    calculateTeamTotals,
+    calculateStatDifferences,
+    getCurrentTeamMinutes,
+    getTeamMinutesDifference
+  } = usePlayerStats();
+
   if (!players.length) {
     return null;
   }
 
+  const teamName = players[0]?.team || '';
   const currentStats = calculateTeamTotals(players);
   const originalStats = calculateTeamTotals(
     players.map(p => ({ stats: p.original.stats }))
   );
   const differences = calculateStatDifferences(currentStats, originalStats);
-  const { current: totalMinutes, difference: minutesDifference } = calculateTeamMinutes(players);
+  const totalMinutes = getCurrentTeamMinutes(teamName);
+  const minutesDifference = getTeamMinutesDifference(teamName);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Team Totals - {players[0]?.team}</CardTitle>
+        <CardTitle>Team Totals - {teamName}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">

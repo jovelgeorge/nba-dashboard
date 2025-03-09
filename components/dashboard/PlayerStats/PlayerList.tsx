@@ -3,12 +3,8 @@ import { useDashboard } from '@/contexts/DashboardContext';
 import { validateTeamMinutes } from '@/lib/validation';
 import { ValidationWarning } from '@/components/ValidationWarning';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import type { Player } from '@/types';
+import type { PlayerListProps } from '.';
 import { PlayerRow } from './PlayerRow';
-
-interface PlayerListProps {
-  players: Player[];
-}
 
 export function PlayerList({ players }: PlayerListProps) {
   const { state } = useDashboard();
@@ -30,10 +26,7 @@ export function PlayerList({ players }: PlayerListProps) {
       
       {players.map(player => (
         <ErrorBoundary key={player.name}>
-          <PlayerRow
-            player={player}
-            allTeamPlayers={players}
-          />
+          <PlayerRow player={player} />
         </ErrorBoundary>
       ))}
     </div>
