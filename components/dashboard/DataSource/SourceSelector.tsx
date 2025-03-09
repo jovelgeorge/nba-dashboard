@@ -46,7 +46,7 @@ export function SourceSelector() {
                 "absolute top-1 right-1 w-2 h-2 rounded-full",
                 state.fileStatus[source].lastUpdate ? "bg-green-500" : "bg-gray-300"
               )} />
-              {source} Projections
+              {source}
             </Button>
           ))}
         </div>
